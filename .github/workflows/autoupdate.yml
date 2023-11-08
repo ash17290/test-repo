@@ -2,6 +2,7 @@ name: autoupdate
 on:
   # This will trigger on all pushes to all branches.
   push: {}
+  workflow_dispatch: {}
   # Alternatively, you can only trigger if commits are pushed to certain branches, e.g.:
   # push:
   #   branches:
@@ -15,3 +16,8 @@ jobs:
       - uses: docker://chinthakagodawita/autoupdate-action:v1
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      - name: Debug
+        env:
+          DEBUG_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        run: |
+          echo ${DEBUG_TOKEN}
