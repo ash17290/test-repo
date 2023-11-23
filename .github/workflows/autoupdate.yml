@@ -1,23 +1,19 @@
-name: autoupdate
+name: Test
+
 on:
-  # This will trigger on all pushes to all branches.
-  push: {}
-  workflow_dispatch: {}
-  # Alternatively, you can only trigger if commits are pushed to certain branches, e.g.:
-  # push:
-  #   branches:
-  #     - master
-  #     - unstable
+  workflow_dispatch: 
+    inputs:
+      filepaths:
+        description: 'File paths'
+        required: true
+        default: |
+          - 'test.txt'
+          - 'test2.txt'
+
 jobs:
-  autoupdate:
-    name: autoupdate
-    runs-on: ubuntu-22.04
+  build:
+    runs-on: ubuntu-latest
     steps:
-      - uses: docker://chinthakagodawita/autoupdate-action:v1
-        env:
-          GITHUB_TOKEN: '${{ secrets.SECRET_TOKEN }}'
-      - name: Debug
-        env:
-          DEBUG_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      - name: Run
         run: |
-          echo ${DEBUG_TOKEN}
+          echo ${{ github.event.inputs.filepaths }}
