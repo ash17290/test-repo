@@ -34,7 +34,7 @@ jobs:
             });
             core.debug(`PR: ${JSON.stringify(pr)}`);
 
-            # If the PR has conflicts, we don't want to update it
+            // If the PR has conflicts, we don't want to update it
             const updateable = ['behind', 'blocked', 'unknown', 'draft'].includes(pr.mergeable_state);
             console.log(`PR #${prNumber} is ${pr.mergeable_state} and is ${updateable ? 'updateable' : 'not updateable'}`);
             core.setOutput('updateable', updateable);
@@ -74,7 +74,7 @@ jobs:
                   error => error.type === 'FORBIDDEN' || error.type === 'UNAUTHORIZED'
                 )
               ) {
-                # Add comment to PR if the bot doesn't have permissions to update the PR
+                // Add comment to PR if the bot doesn't have permissions to update the PR
 
                 const comment = `
                   @${context.actor} I don't have permissions to update this PR. Please ask the PR author to check the "Allow edits from maintainers" checkbox in the PR settings.
