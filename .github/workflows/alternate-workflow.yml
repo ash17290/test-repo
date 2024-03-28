@@ -54,11 +54,13 @@ jobs:
               }
             }`;
 
+            const pr_details = JSON.parse('${{ steps.pr.outputs.result }}');
+
             try {
               const { data } = await github.graphql(mutation, {
                 input: {
-                  pullRequestId: ${{ steps.pr.outputs.result.id }},
-                  expectedHeadOid: ${{ steps.pr.outputs.result.head }}
+                  pullRequestId: ${pr_details.id},
+                  expectedHeadOid: ${pr_details.head},
                 }
               });
             } catch (GraphQLError) {
