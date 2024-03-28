@@ -54,7 +54,7 @@ jobs:
               }
             }`;
 
-            const pr_details = JSON.parse('${{ steps.pr.outputs.result }}');
+            const pr_details = JSON.parse(${{ steps.pr.outputs.result }});
 
             try {
               const { data } = await github.graphql(mutation, {
