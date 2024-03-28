@@ -1,0 +1,85 @@
+name: Autoupdate PR branches from fork
+
+on:
+  issue_comment: 
+    types: [created]
+
+jobs:
+  autoupdate-pr:
+    if: >
+      github.event_name == 'issue_comment' && (
+        contains(github.event.comment.body, '/update') ||
+        contains(github.event.comment.body, '/u')
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Pull Request Details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          previews: 'merge-info-preview' # https://docs.github.com/en/graphql/overview/schema-previews#merge-info-preview-more-detailed-information-about-a-pull-requests-merge-state-preview
+          script: |
+            const prNumber = context.payload.issue.number;
+            const { data: pr } = await github.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            # If the PR has conflicts, we don't want to update it
+            const updateable = ['behind', 'blocked', 'unknown', 'draft'].includes(pr.mergeable_state);
+            console.log(`PR #${prNumber} is ${pr.mergeable_state} and is ${updateable ? 'updateable' : 'not updateable'}`);
+            core.setOutput('updateable', updateable);
+
+            return {
+              id: pr.node_id,
+              number: prNumber,
+              head: pr.head.sha,
+            }
+      - name: Update the Pull Request
+        if: steps.pr.outputs.updateable == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const mutation = `mutation update($input: UpdatePullRequestBranchInput!) {
+              updatePullRequestBranch(input: $input) {
+                pullRequest {
+                  mergeable
+                }
+              }
+            }`;
+
+            try {
+              const { data } = await github.graphql(mutation, {
+                input: {
+                  pullRequestId: ${{ steps.pr.outputs.id }},
+                  expectedHeadOid: ${{ steps.pr.outputs.head }},
+                }
+              });
+            } catch (GraphQLError) {
+              if (
+                GraphQLError.name === 'GraphqlResponseError' &&
+                GraphQLError.errors.some(
+                  error => error.type === 'FORBIDDEN' || error.type === 'UNAUTHORIZED'
+                )
+              ) {
+                # Add comment to PR if the bot doesn't have permissions to update the PR
+
+                const comment = `
+                  @${context.actor} I don't have permissions to update this PR. Please ask the PR author to check the "Allow edits from maintainers" checkbox in the PR settings.
+                `;
+
+                await github.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: comment
+                });
+
+                core.setFailed('Bot does not have permissions to update the PR');
+              } else {
+                core.setFailed(GraphQLError.message);
+              }
+            }
