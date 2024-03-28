@@ -59,8 +59,8 @@ jobs:
             try {
               const { data } = await github.graphql(mutation, {
                 input: {
-                  pullRequestId: ${pr_details.id},
-                  expectedHeadOid: ${pr_details.head},
+                  pullRequestId: pr_details.id,
+                  expectedHeadOid: pr_details.head,
                 }
               });
             } catch (GraphQLError) {
