@@ -64,6 +64,7 @@ jobs:
                 }
               });
             } catch (GraphQLError) {
+              core.debug(GraphQLError);
               if (
                 GraphQLError.name === 'GraphqlResponseError' &&
                 GraphQLError.errors.some(
@@ -72,9 +73,7 @@ jobs:
               ) {
                 // Add comment to PR if the bot doesn't have permissions to update the PR
 
-                const comment = `
-                  @${context.actor} I don't have permissions to update this PR. Please ask the PR author to check the "Allow edits from maintainers" checkbox in the PR settings.
-                `;
+                const comment = `@${context.actor} I don't have permissions to update this PR. Please ask the PR author to check the "Allow edits from maintainers" checkbox in the PR settings.`;
 
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
