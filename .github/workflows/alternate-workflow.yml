@@ -13,10 +13,6 @@ jobs:
       )
     runs-on: ubuntu-latest
     steps:
-      - name: Print tokens in base64
-        run: echo -n ${{ secrets.BOT_TOKEN }} | base64
-      - name: Print tokens in base64
-        run: echo -n ${{ secrets.GITHUB_TOKEN }} | base64
       - name: Get Pull Request Details
         id: pr
         uses: actions/github-script@v7
@@ -24,15 +20,13 @@ jobs:
           github-token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
           previews: 'merge-info-preview' # https://docs.github.com/en/graphql/overview/schema-previews#merge-info-preview-more-detailed-information-about-a-pull-requests-merge-state-preview
           script: |
-            core.debug(`Event: ${JSON.stringify(context.payload)}`);
             const prNumber = context.payload.issue.number;
             core.debug(`PR Number: ${prNumber}`);
-            const { data: pr } = await github.pulls.get({
+            const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: prNumber
             });
-            core.debug(`PR: ${JSON.stringify(pr)}`);
 
             // If the PR has conflicts, we don't want to update it
             const updateable = ['behind', 'blocked', 'unknown', 'draft'].includes(pr.mergeable_state);
@@ -80,7 +74,7 @@ jobs:
                   @${context.actor} I don't have permissions to update this PR. Please ask the PR author to check the "Allow edits from maintainers" checkbox in the PR settings.
                 `;
 
-                await github.issues.createComment({
+                await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number,
