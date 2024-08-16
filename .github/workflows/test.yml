@@ -1,0 +1,16 @@
+name: Test
+
+on:
+  workflow_dispatch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Generating HTML from my AsyncAPI document
+          uses: asyncapi/github-action-for-cli@v3.1.1 # You can use any version you want
+          with:
+            command: generate
+            filepath: ./asyncapi.yml
+            language: typescript
+            output: generated-models
