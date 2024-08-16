@@ -1,12 +1,14 @@
 name: Test
 
 on:
-  workflow_dispatch
+  - workflow_dispatch
+  - push
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+        - uses: actions/checkout@v4
         - name: Generating models from my AsyncAPI document
           uses: asyncapi/github-action-for-cli@v3.1.2 # You can use any version you want
           with:
