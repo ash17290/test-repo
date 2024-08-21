@@ -16,7 +16,7 @@ jobs:
       uses: asyncapi/github-action-for-cli@v3.1.1 # You can use any version you want
       with:
         command: generate
-        filepath: docs/api/async-api.yml
+        filepath: asyncapi.yml
         language: golang
         parameters: --packageName=models
         output: docs/api/generated-models
