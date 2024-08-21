@@ -5,14 +5,18 @@ on:
   - push
 
 jobs:
-  test:
+  generate-models:
     runs-on: ubuntu-latest
     steps:
-        - uses: actions/checkout@v4
-        - name: Generating models from my AsyncAPI document
-          uses: asyncapi/github-action-for-cli@v3.1.2 # You can use any version you want
-          with:
-            command: generate
-            filepath: asyncapi.yml
-            language: typescript
-            output: generated-models
+    #"standard step" where repo needs to be checked-out first
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Generating models from my AsyncAPI document
+      uses: asyncapi/github-action-for-cli@v3.1.1 # You can use any version you want
+      with:
+        command: generate
+        filepath: docs/api/async-api.yml
+        language: golang
+        parameters: --packageName=models
+        output: docs/api/generated-models
