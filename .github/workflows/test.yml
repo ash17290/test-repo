@@ -21,5 +21,8 @@ jobs:
         parameters: --packageName=models
         output: docs/api/generated-models
 
+    - name: Fix permissions
+      run: sudo chown -R $USER:$USER .
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v6
